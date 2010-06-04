@@ -190,36 +190,37 @@ def parse_ns_headers(ns_headers):
                    "version", "port", "max-age")
 
     result = []
-    for ns_header in ns_headers:
-        pairs = []
-        version_set = False
-        params = re.split(r";\s*", ns_header)
-        for ii in range(len(params)):
-            param = params[ii]
-            param = param.rstrip()
-            if param == "": continue
-            if "=" not in param:
-                k, v = param, None
-            else:
-                k, v = re.split(r"\s*=\s*", param, 1)
-                k = k.lstrip()
-            if ii != 0:
-                lc = k.lower()
-                if lc in known_attrs:
-                    k = lc
-                if k == "version":
-                    # This is an RFC 2109 cookie.
-                    v = strip_quotes(v)
-                    version_set = True
-                if k == "expires":
-                    # convert expires date to seconds since epoch
-                    v = http2time(strip_quotes(v))  # None if invalid
-            pairs.append((k, v))
-
-        if pairs:
-            if not version_set:
-                pairs.append(("version", "0"))
-            result.append(pairs)
+    for _ns_header in ns_headers:
+        for ns_header in re.split(r",\s*", _ns_header):
+            pairs = []
+            version_set = False
+            params = re.split(r";\s*", ns_header)
+            for ii in range(len(params)):
+                param = params[ii]
+                param = param.rstrip()
+                if param == "": continue
+                if "=" not in param:
+                    k, v = param, None
+                else:
+                    k, v = re.split(r"\s*=\s*", param, 1)
+                    k = k.lstrip()
+                if ii != 0:
+                    lc = k.lower()
+                    if lc in known_attrs:
+                        k = lc
+                    if k == "version":
+                        # This is an RFC 2109 cookie.
+                        v = strip_quotes(v)
+                        version_set = True
+                    if k == "expires":
+                        # convert expires date to seconds since epoch
+                        v = http2time(strip_quotes(v))  # None if invalid
+                pairs.append((k, v))
+    
+            if pairs:
+                if not version_set:
+                    pairs.append(("version", "0"))
+                result.append(pairs)
 
     return result
 
