@@ -67,14 +67,19 @@ else:
 
 
 try:
-    socket._fileobject("fake socket", close=True)
+    # fixed start -- fixed for gae
+    class x:
+        pass
+    # the x should be an object, not a string,
+    # This is the key
+    socket._fileobject(x, close=True)
+    # fixed ended
 except TypeError:
     # python <= 2.4
     create_readline_wrapper = socket._fileobject
 else:
     def create_readline_wrapper(fh):
         return socket._fileobject(fh, close=True)
-
 
 # python 2.4 splithost has a bug in empty path component case
 _hostprog = None
